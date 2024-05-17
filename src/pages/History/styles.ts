@@ -54,7 +54,7 @@ const STATUS_COLORS = {
 } as const
 
 interface TaskStatusProps {
-  statusValue: keyof typeof STATUS_COLORS
+  $statusValue: keyof typeof STATUS_COLORS
 }
 
 export const TaskStatus = styled.span<TaskStatusProps>`
@@ -67,6 +67,6 @@ export const TaskStatus = styled.span<TaskStatusProps>`
     width: 0.8rem;
     height: 0.8rem;
     border-radius: 50%;
-    background: ${props => props.theme[STATUS_COLORS[props.statusValue]]};
+    background: ${props => props.theme[STATUS_COLORS[props.$statusValue]]};
   }
 `

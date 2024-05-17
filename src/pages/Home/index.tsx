@@ -1,4 +1,5 @@
 import { Play } from "@phosphor-icons/react";
+import { useForm } from "react-hook-form";
 import {
   CountdownButton, CountdownContainer,
   DurationInput, FormContainer,
@@ -6,25 +7,32 @@ import {
 } from "./styles";
 
 export function Home() {
+  const { register, handleSubmit, watch } = useForm();
+
+  function createNewWork(data: any) {
+    console.log(data)
+  }
+
+  const task = watch('taskDescription')
+
   return (
     <HomeContainer>
-      <form action="">
+      <form action="" onSubmit={handleSubmit(createNewWork)}>
         <FormContainer>
           <label htmlFor="input-task">Vou trabalhar em</label>
           <TaskInput
             type="text"
-            name="input-task"
             id="input-task"
             placeholder="tarefa que você vai trabalhar"
+            {...register('taskDescription')}
           />
-          <label htmlFor="input-minutes-duration">durante</label>
+          <label htmlFor="duration-input">durante</label>
           <DurationInput
             type="number"
-            step={5}
             min={1} max={60}
-            name="input-minutes-duration"
-            id="input-minutes-duration"
+            id="duration-input"
             placeholder="00"
+            {...register('durationMinutes', { valueAsNumber: true })}
           />
 
           <span>minutos.</span>
@@ -36,7 +44,11 @@ export function Home() {
           <span>0</span>
           <span>0</span>
         </CountdownContainer>
-        <CountdownButton type="submit"><Play />Começar</CountdownButton>
+        <CountdownButton
+          type="submit"
+          disabled={!task}>
+          <Play />Começar
+        </CountdownButton>
       </form>
     </HomeContainer>
   )

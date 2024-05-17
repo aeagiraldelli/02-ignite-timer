@@ -20,7 +20,7 @@ export function History() {
               <td>20 minutos</td>
               <td>Há cerca de 2 semanas</td>
               <td>
-                <TaskStatus statusValue="andamento">Em andamento</TaskStatus>
+                <TaskStatus $statusValue="andamento">Em andamento</TaskStatus>
               </td>
             </tr>
             <tr>
@@ -28,7 +28,7 @@ export function History() {
               <td>20 minutos</td>
               <td>Há cerca de 2 semanas</td>
               <td>
-                <TaskStatus statusValue="concluido">Concluído</TaskStatus>
+                <TaskStatus $statusValue="concluido">Concluído</TaskStatus>
               </td>
             </tr>
             <tr>
@@ -36,7 +36,7 @@ export function History() {
               <td>20 minutos</td>
               <td>Há cerca de 2 semanas</td>
               <td>
-                <TaskStatus statusValue="concluido">Concluído</TaskStatus>
+                <TaskStatus $statusValue="concluido">Concluído</TaskStatus>
               </td>
             </tr>
             <tr>
@@ -44,7 +44,7 @@ export function History() {
               <td>20 minutos</td>
               <td>Há cerca de 2 semanas</td>
               <td>
-                <TaskStatus statusValue="cancelado">Cancelado</TaskStatus>
+                <TaskStatus $statusValue="cancelado">Cancelado</TaskStatus>
               </td>
             </tr>
             <tr>
@@ -52,7 +52,7 @@ export function History() {
               <td>20 minutos</td>
               <td>Há cerca de 2 semanas</td>
               <td>
-                <TaskStatus statusValue="concluido">Concluído</TaskStatus>
+                <TaskStatus $statusValue="concluido">Concluído</TaskStatus>
               </td>
             </tr>
             <tr>
@@ -60,7 +60,7 @@ export function History() {
               <td>20 minutos</td>
               <td>Há cerca de 2 semanas</td>
               <td>
-                <TaskStatus statusValue="concluido">Concluído</TaskStatus>
+                <TaskStatus $statusValue="concluido">Concluído</TaskStatus>
               </td>
             </tr>
             <tr>
@@ -68,7 +68,7 @@ export function History() {
               <td>20 minutos</td>
               <td>Há cerca de 2 semanas</td>
               <td>
-                <TaskStatus statusValue="concluido">Concluído</TaskStatus>
+                <TaskStatus $statusValue="concluido">Concluído</TaskStatus>
               </td>
             </tr>
             <tr>
@@ -76,7 +76,7 @@ export function History() {
               <td>20 minutos</td>
               <td>Há cerca de 2 semanas</td>
               <td>
-                <TaskStatus statusValue="cancelado">Cancelado</TaskStatus>
+                <TaskStatus $statusValue="cancelado">Cancelado</TaskStatus>
               </td>
             </tr>
           </tbody>
