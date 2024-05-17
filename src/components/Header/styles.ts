@@ -27,7 +27,12 @@ export const HeaderContainer = styled.header`
       }
 
       &.active {
-        color: ${props => props.theme['green-500']}
+        color: ${props => props.theme['green-500']};
+      }
+
+      &:focus {
+        outline: none;
+        box-shadow: none;
       }
     }
   }
