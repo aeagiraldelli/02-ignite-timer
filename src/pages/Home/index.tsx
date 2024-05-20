@@ -11,7 +11,7 @@ import {
 
 const newCycleFormSchema = z.object({
   taskDescription: z.string().min(3, 'O nome da tarefa precisa ter no mínimo 3 letras.'),
-  durationsMinutes: z.number().min(1).max(60)
+  durationMinutes: z.number().min(1).max(60)
 });
 
 type NewCycleData = z.infer<typeof newCycleFormSchema>
@@ -20,7 +20,7 @@ export function Home() {
   const { register, handleSubmit, watch, reset } = useForm<NewCycleData>({
     resolver: zodResolver(newCycleFormSchema),
     defaultValues: {
-      durationsMinutes: 0,
+      durationMinutes: 0,
       taskDescription: ''
     }
   });
