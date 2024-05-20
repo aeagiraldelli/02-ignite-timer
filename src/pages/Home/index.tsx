@@ -14,13 +14,20 @@ const newCycleFormSchema = z.object({
   durationsMinutes: z.number().min(1).max(60)
 });
 
+type NewCycleData = z.infer<typeof newCycleFormSchema>
+
 export function Home() {
-  const { register, handleSubmit, watch } = useForm({
+  const { register, handleSubmit, watch, reset } = useForm<NewCycleData>({
     resolver: zodResolver(newCycleFormSchema),
+    defaultValues: {
+      durationsMinutes: 0,
+      taskDescription: ''
+    }
   });
 
-  function createNewWork(data: any) {
+  function createNewWork(data: NewCycleData) {
     console.log(data)
+    reset()
   }
 
   const task = watch('taskDescription')
