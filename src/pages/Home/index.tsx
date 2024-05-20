@@ -1,13 +1,23 @@
 import { Play } from "@phosphor-icons/react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from 'zod';
+
 import {
   CountdownButton, CountdownContainer,
   DurationInput, FormContainer,
   HomeContainer, Separator, TaskInput
 } from "./styles";
 
+const newCycleFormSchema = z.object({
+  taskDescription: z.string().min(3, 'O nome da tarefa precisa ter no mínimo 3 letras.'),
+  durationsMinutes: z.number().min(1).max(60)
+});
+
 export function Home() {
-  const { register, handleSubmit, watch } = useForm();
+  const { register, handleSubmit, watch } = useForm({
+    resolver: zodResolver(newCycleFormSchema),
+  });
 
   function createNewWork(data: any) {
     console.log(data)
