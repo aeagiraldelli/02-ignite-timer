@@ -60,14 +60,28 @@ export function Home() {
   const countdownSeconds = String(seconds).padStart(2, '0')
 
   useEffect(() => {
+    let interval: number | null
     if (activeWorkCycle) {
-      setInterval(() => {
+      interval = setInterval(() => {
         const secondsPassed = differenceInSeconds(new Date(), activeWorkCycle.startDate)
         const diffSeconds = totalSeconds - secondsPassed
         setTotalSeconds(diffSeconds)
       }, 1000)
     }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval)
+      }
+    }
   }, [activeWorkCycle])
+
+
+  useEffect(() => {
+    if (activeWorkCycle) {
+      document.title = `${countdownMinutes}:${countdownSeconds}`
+    }
+  }, [countdownMinutes, countdownSeconds, activeWorkCycle])
 
   return (
     <HomeContainer>
