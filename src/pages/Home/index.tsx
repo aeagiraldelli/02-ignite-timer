@@ -8,7 +8,8 @@ import {
   DurationInput, FormContainer,
   HomeContainer, Separator, TaskInput
 } from "./styles";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { differenceInSeconds } from "date-fns";
 
 const newCycleFormSchema = z.object({
   taskDescription: z.string().min(3, 'O nome da tarefa precisa ter no mínimo 3 letras.'),
@@ -17,17 +18,17 @@ const newCycleFormSchema = z.object({
 
 type NewCycleData = z.infer<typeof newCycleFormSchema>
 
-
 interface Cycle {
   id: string;
   task: string;
   totalMinutes: number;
+  startDate: Date;
 }
-
 
 export function Home() {
   const [cycles, setCycles] = useState<Cycle[]>([])
   const [activeWorkCycle, setActiveWorkCycle] = useState<Cycle | null>(null)
+  const [totalSeconds, setTotalSeconds] = useState<number>(0)
 
   const { register, handleSubmit, watch, reset } = useForm<NewCycleData>({
     resolver: zodResolver(newCycleFormSchema),
@@ -41,14 +42,32 @@ export function Home() {
     const newWorkCycle: Cycle = {
       id: new Date().getTime().toString(),
       task: data.taskDescription,
-      totalMinutes: data.durationMinutes
+      totalMinutes: data.durationMinutes,
+      startDate: new Date(),
     }
     setCycles((state) => [...state, newWorkCycle])
     setActiveWorkCycle(newWorkCycle)
+    setTotalSeconds(newWorkCycle.totalMinutes * 60)
     reset()
   }
 
   const task = watch('taskDescription')
+
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+
+  const countdownMinutes = String(minutes).padStart(2, '0')
+  const countdownSeconds = String(seconds).padStart(2, '0')
+
+  useEffect(() => {
+    if (activeWorkCycle) {
+      setInterval(() => {
+        const secondsPassed = differenceInSeconds(new Date(), activeWorkCycle.startDate)
+        const diffSeconds = totalSeconds - secondsPassed
+        setTotalSeconds(diffSeconds)
+      }, 1000)
+    }
+  }, [activeWorkCycle])
 
   return (
     <HomeContainer>
@@ -73,11 +92,11 @@ export function Home() {
           <span>minutos.</span>
         </FormContainer>
         <CountdownContainer>
-          <span>0</span>
-          <span>0</span>
+          <span>{countdownMinutes[0]}</span>
+          <span>{countdownMinutes[1]}</span>
           <Separator>:</Separator>
-          <span>0</span>
-          <span>0</span>
+          <span>{countdownSeconds[0]}</span>
+          <span>{countdownSeconds[1]}</span>
         </CountdownContainer>
         <CountdownButton
           type="submit"
