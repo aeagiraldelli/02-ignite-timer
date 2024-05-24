@@ -8,6 +8,7 @@ import {
   DurationInput, FormContainer,
   HomeContainer, Separator, TaskInput
 } from "./styles";
+import { useState } from "react";
 
 const newCycleFormSchema = z.object({
   taskDescription: z.string().min(3, 'O nome da tarefa precisa ter no mínimo 3 letras.'),
@@ -16,7 +17,18 @@ const newCycleFormSchema = z.object({
 
 type NewCycleData = z.infer<typeof newCycleFormSchema>
 
+
+interface Cycle {
+  id: string;
+  task: string;
+  totalMinutes: number;
+}
+
+
 export function Home() {
+  const [cycles, setCycles] = useState<Cycle[]>([])
+  const [activeWorkCycle, setActiveWorkCycle] = useState<Cycle | null>(null)
+
   const { register, handleSubmit, watch, reset } = useForm<NewCycleData>({
     resolver: zodResolver(newCycleFormSchema),
     defaultValues: {
@@ -26,7 +38,13 @@ export function Home() {
   });
 
   function createNewWork(data: NewCycleData) {
-    console.log(data)
+    const newWorkCycle: Cycle = {
+      id: new Date().getTime().toString(),
+      task: data.taskDescription,
+      totalMinutes: data.durationMinutes
+    }
+    setCycles((state) => [...state, newWorkCycle])
+    setActiveWorkCycle(newWorkCycle)
     reset()
   }
 
