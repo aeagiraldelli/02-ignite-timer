@@ -1,12 +1,14 @@
-import { Play } from "@phosphor-icons/react";
+import { HandPalm, Play } from "@phosphor-icons/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from 'zod';
 
 import {
-  CountdownButton, CountdownContainer,
+  CountdownContainer,
   DurationInput, FormContainer,
-  HomeContainer, Separator, TaskInput
+  HomeContainer, Separator,
+  StartCountdownButton, StopCountdownButton,
+  TaskInput
 } from "./styles";
 import { useEffect, useState } from "react";
 import { differenceInSeconds } from "date-fns";
@@ -23,6 +25,8 @@ interface Cycle {
   task: string;
   totalMinutes: number;
   startDate: Date;
+  interruptedDate?: Date;
+  finishedDate?: Date;
 }
 
 export function Home() {
@@ -65,7 +69,20 @@ export function Home() {
       interval = setInterval(() => {
         const secondsPassed = differenceInSeconds(new Date(), activeWorkCycle.startDate)
         const diffSeconds = totalSeconds - secondsPassed
-        setTotalSeconds(diffSeconds)
+        if (diffSeconds <= 0) {
+          const mappedCycles = cycles.map((cycle) => {
+            if (activeWorkCycle && cycle.id === activeWorkCycle.id) {
+              return { ...cycle, finishedDate: new Date() }
+            } else {
+              return cycle
+            }
+          })
+          setCycles(mappedCycles)
+          setActiveWorkCycle(null)
+          setTotalSeconds(0)
+        } else {
+          setTotalSeconds(diffSeconds)
+        }
       }, 1000)
     }
 
@@ -79,9 +96,25 @@ export function Home() {
 
   useEffect(() => {
     if (activeWorkCycle) {
-      document.title = `${countdownMinutes}:${countdownSeconds}`
+      document.title = `${countdownMinutes}:${countdownSeconds} - Task Timer`
+    } else {
+      document.title = `Task Timer`
     }
   }, [countdownMinutes, countdownSeconds, activeWorkCycle])
+
+  function handleInterruptWorkCycle() {
+    const filteredCycles = cycles.map((c) => {
+      if (activeWorkCycle && c.id === activeWorkCycle.id) {
+        return { ...c, interruptedDate: new Date() }
+      } else {
+        return c
+      }
+    })
+
+    setCycles(filteredCycles)
+    setActiveWorkCycle(null)
+    setTotalSeconds(0)
+  }
 
   return (
     <HomeContainer>
@@ -92,6 +125,7 @@ export function Home() {
             type="text"
             id="input-task"
             placeholder="tarefa que você vai trabalhar"
+            disabled={!!activeWorkCycle}
             {...register('taskDescription')}
           />
           <label htmlFor="duration-input">durante</label>
@@ -100,6 +134,7 @@ export function Home() {
             min={1} max={60}
             id="duration-input"
             placeholder="00"
+            disabled={!!activeWorkCycle}
             {...register('durationMinutes', { valueAsNumber: true })}
           />
 
@@ -112,12 +147,21 @@ export function Home() {
           <span>{countdownSeconds[0]}</span>
           <span>{countdownSeconds[1]}</span>
         </CountdownContainer>
-        <CountdownButton
-          type="submit"
-          disabled={!task}>
-          <Play />Começar
-        </CountdownButton>
+
+        {activeWorkCycle ? (
+          <StopCountdownButton
+            type="button"
+            onClick={handleInterruptWorkCycle}>
+            <HandPalm size={24} />Interromper
+          </StopCountdownButton>
+        ) : (
+          <StartCountdownButton
+            type="submit"
+            disabled={!task}>
+            <Play size={24} />Começar
+          </StartCountdownButton>
+        )}
       </form>
-    </HomeContainer>
+    </HomeContainer >
   )
 }
