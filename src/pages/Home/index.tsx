@@ -1,17 +1,13 @@
+import { createContext, useState } from "react";
 import { HandPalm, Play } from "@phosphor-icons/react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from 'zod';
-
+import { FormProvider, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Cycle, NewWorkCycleForm } from "./Components/NewWorkCycleForm";
+import { Countdown } from "./Components/Countdown";
 import {
-  CountdownContainer,
-  DurationInput, FormContainer,
-  HomeContainer, Separator,
-  StartCountdownButton, StopCountdownButton,
-  TaskInput
+  HomeContainer, StartCountdownButton, StopCountdownButton
 } from "./styles";
-import { useEffect, useState } from "react";
-import { differenceInSeconds } from "date-fns";
 
 const newCycleFormSchema = z.object({
   taskDescription: z.string().min(3, 'O nome da tarefa precisa ter no mínimo 3 letras.'),
@@ -20,21 +16,17 @@ const newCycleFormSchema = z.object({
 
 type NewCycleData = z.infer<typeof newCycleFormSchema>
 
-interface Cycle {
-  id: string;
-  task: string;
-  totalMinutes: number;
-  startDate: Date;
-  interruptedDate?: Date;
-  finishedDate?: Date;
+type CyclesContextData = {
+  activeWorkCycle: Cycle | undefined;
+  onCycleFinished: (cycle: Cycle) => void
 }
+
+export const CyclesContext = createContext({} as CyclesContextData)
 
 export function Home() {
   const [cycles, setCycles] = useState<Cycle[]>([])
-  const [activeWorkCycle, setActiveWorkCycle] = useState<Cycle | null>(null)
-  const [totalSeconds, setTotalSeconds] = useState<number>(0)
-
-  const { register, handleSubmit, watch, reset } = useForm<NewCycleData>({
+  const [activeWorkCycle, setActiveWorkCycle] = useState<Cycle | undefined>(undefined)
+  const form = useForm<NewCycleData>({
     resolver: zodResolver(newCycleFormSchema),
     defaultValues: {
       durationMinutes: 0,
@@ -42,65 +34,7 @@ export function Home() {
     }
   });
 
-  function createNewWork(data: NewCycleData) {
-    const newWorkCycle: Cycle = {
-      id: new Date().getTime().toString(),
-      task: data.taskDescription,
-      totalMinutes: data.durationMinutes,
-      startDate: new Date(),
-    }
-    setCycles((state) => [...state, newWorkCycle])
-    setActiveWorkCycle(newWorkCycle)
-    setTotalSeconds(newWorkCycle.totalMinutes * 60)
-    reset()
-  }
-
-  const task = watch('taskDescription')
-
-  const minutes = Math.floor(totalSeconds / 60)
-  const seconds = totalSeconds % 60
-
-  const countdownMinutes = String(minutes).padStart(2, '0')
-  const countdownSeconds = String(seconds).padStart(2, '0')
-
-  useEffect(() => {
-    let interval: number | null
-    if (activeWorkCycle) {
-      interval = setInterval(() => {
-        const secondsPassed = differenceInSeconds(new Date(), activeWorkCycle.startDate)
-        const diffSeconds = totalSeconds - secondsPassed
-        if (diffSeconds <= 0) {
-          const mappedCycles = cycles.map((cycle) => {
-            if (activeWorkCycle && cycle.id === activeWorkCycle.id) {
-              return { ...cycle, finishedDate: new Date() }
-            } else {
-              return cycle
-            }
-          })
-          setCycles(mappedCycles)
-          setActiveWorkCycle(null)
-          setTotalSeconds(0)
-        } else {
-          setTotalSeconds(diffSeconds)
-        }
-      }, 1000)
-    }
-
-    return () => {
-      if (interval) {
-        clearInterval(interval)
-      }
-    }
-  }, [activeWorkCycle])
-
-
-  useEffect(() => {
-    if (activeWorkCycle) {
-      document.title = `${countdownMinutes}:${countdownSeconds} - Task Timer`
-    } else {
-      document.title = `Task Timer`
-    }
-  }, [countdownMinutes, countdownSeconds, activeWorkCycle])
+  const { handleSubmit, watch, reset } = form
 
   function handleInterruptWorkCycle() {
     const filteredCycles = cycles.map((c) => {
@@ -112,41 +46,49 @@ export function Home() {
     })
 
     setCycles(filteredCycles)
-    setActiveWorkCycle(null)
-    setTotalSeconds(0)
+    setActiveWorkCycle(undefined)
   }
+
+  function cycleFinished(cycle: Cycle) {
+    const mappedCycles = cycles.map((c) => {
+      if (activeWorkCycle && c.id === cycle.id) {
+        return { ...c, finishedDate: new Date() }
+      } else {
+        return c
+      }
+    })
+    setCycles(mappedCycles)
+    setActiveWorkCycle(undefined)
+  }
+
+  function newWorkCycle(data: NewCycleData) {
+    const newWorkCycle: Cycle = {
+      id: new Date().getTime().toString(),
+      task: data.taskDescription,
+      totalMinutes: data.durationMinutes,
+      startDate: new Date(),
+    }
+
+    setCycles((state) => [...state, newWorkCycle])
+    setActiveWorkCycle(newWorkCycle)
+    reset()
+  }
+
+  const task = watch('taskDescription')
 
   return (
     <HomeContainer>
-      <form action="" onSubmit={handleSubmit(createNewWork)}>
-        <FormContainer>
-          <label htmlFor="input-task">Vou trabalhar em</label>
-          <TaskInput
-            type="text"
-            id="input-task"
-            placeholder="tarefa que você vai trabalhar"
-            disabled={!!activeWorkCycle}
-            {...register('taskDescription')}
-          />
-          <label htmlFor="duration-input">durante</label>
-          <DurationInput
-            type="number"
-            min={1} max={60}
-            id="duration-input"
-            placeholder="00"
-            disabled={!!activeWorkCycle}
-            {...register('durationMinutes', { valueAsNumber: true })}
-          />
-
-          <span>minutos.</span>
-        </FormContainer>
-        <CountdownContainer>
-          <span>{countdownMinutes[0]}</span>
-          <span>{countdownMinutes[1]}</span>
-          <Separator>:</Separator>
-          <span>{countdownSeconds[0]}</span>
-          <span>{countdownSeconds[1]}</span>
-        </CountdownContainer>
+      <form action="" onSubmit={handleSubmit(newWorkCycle)}>
+        <CyclesContext.Provider
+          value={{
+            activeWorkCycle,
+            onCycleFinished: cycleFinished,
+          }}>
+          <FormProvider {...form}>
+            <NewWorkCycleForm />
+          </FormProvider>
+          <Countdown />
+        </CyclesContext.Provider>
 
         {activeWorkCycle ? (
           <StopCountdownButton
