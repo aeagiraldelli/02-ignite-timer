@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { differenceInSeconds } from "date-fns/differenceInSeconds";
+import { differenceInSeconds } from "date-fns";
 import { CountdownContainer, Separator } from "./styles";
 import { CyclesContext } from "../..";
 
@@ -21,23 +21,22 @@ export function Countdown() {
     }
   }, [countdownMinutes, countdownSeconds, activeWorkCycle])
 
-
   useEffect(() => {
-    if (totalSeconds === 0 && activeWorkCycle) {
-      setTotalSeconds(activeWorkCycle.totalMinutes * 60)
-    }
     let interval: number | null
     if (activeWorkCycle) {
       interval = setInterval(() => {
         const secondsPassed = differenceInSeconds(new Date(), activeWorkCycle.startDate)
-        const diffSeconds = totalSeconds - secondsPassed
-        if (diffSeconds <= 0) {
+        const diffSeconds = (activeWorkCycle.totalMinutes * 60 + 1) - secondsPassed
+
+        if (diffSeconds < 0) {
           onCycleFinished(activeWorkCycle)
           setTotalSeconds(0)
         } else {
           setTotalSeconds(diffSeconds)
         }
       }, 1000)
+    } else {
+      setTotalSeconds(0)
     }
 
     return () => {
@@ -45,7 +44,7 @@ export function Countdown() {
         clearInterval(interval)
       }
     }
-  }, [activeWorkCycle, onCycleFinished])
+  }, [totalSeconds, activeWorkCycle, onCycleFinished])
 
   return (
     <CountdownContainer>

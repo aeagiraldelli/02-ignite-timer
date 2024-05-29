@@ -18,7 +18,8 @@ type NewCycleData = z.infer<typeof newCycleFormSchema>
 
 type CyclesContextData = {
   activeWorkCycle: Cycle | undefined;
-  onCycleFinished: (cycle: Cycle) => void
+  onCycleFinished: (cycle: Cycle) => void;
+  totalCountdownMinutes: number;
 }
 
 export const CyclesContext = createContext({} as CyclesContextData)
@@ -62,15 +63,15 @@ export function Home() {
   }
 
   function newWorkCycle(data: NewCycleData) {
-    const newWorkCycle: Cycle = {
+    const cycle: Cycle = {
       id: new Date().getTime().toString(),
       task: data.taskDescription,
       totalMinutes: data.durationMinutes,
       startDate: new Date(),
     }
 
-    setCycles((state) => [...state, newWorkCycle])
-    setActiveWorkCycle(newWorkCycle)
+    setCycles((state) => [...state, cycle])
+    setActiveWorkCycle(cycle)
     reset()
   }
 
@@ -83,6 +84,7 @@ export function Home() {
           value={{
             activeWorkCycle,
             onCycleFinished: cycleFinished,
+            totalCountdownMinutes: activeWorkCycle ? activeWorkCycle?.totalMinutes : 0
           }}>
           <FormProvider {...form}>
             <NewWorkCycleForm />
