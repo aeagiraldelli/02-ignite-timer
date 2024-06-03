@@ -1,16 +1,8 @@
 import { useContext } from "react";
 import { DurationInput, FormContainer, TaskInput } from "./styles";
-import { CyclesContext } from "../..";
 import { useFormContext } from "react-hook-form";
+import { CyclesContext } from "../../../../contexts/CyclesContext";
 
-export type Cycle = {
-  id: string;
-  task: string;
-  totalMinutes: number;
-  startDate: Date;
-  interruptedDate?: Date;
-  finishedDate?: Date;
-}
 
 export function NewWorkCycleForm() {
   const { activeWorkCycle } = useContext(CyclesContext)
