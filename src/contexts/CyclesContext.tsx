@@ -19,7 +19,8 @@ type CyclesContextData = {
   onCycleFinished: (cycle: Cycle) => void;
   totalCountdownMinutes: number;
   onCreateNewWorkCycle: (data: CreateCycleData) => void,
-  interruptCurrentWorkCycle: () => void
+  interruptCurrentWorkCycle: () => void,
+  cycles: Cycle[]
 }
 
 export const CyclesContext = createContext({} as CyclesContextData)
@@ -76,7 +77,8 @@ export function CyclesContextProvider({ children }: CyclesContextProviderProps) 
         onCycleFinished: cycleFinished,
         totalCountdownMinutes: activeWorkCycle ? activeWorkCycle?.totalMinutes : 0,
         onCreateNewWorkCycle: newWorkCycle,
-        interruptCurrentWorkCycle: handleInterruptWorkCycle
+        interruptCurrentWorkCycle: handleInterruptWorkCycle,
+        cycles: cycles
       }}>
       {children}
     </CyclesContext.Provider>
