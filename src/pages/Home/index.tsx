@@ -28,13 +28,16 @@ export function Home() {
     }
   });
 
-  const { handleSubmit, watch, /*reset*/ } = form
+  const { handleSubmit, watch, reset } = form
 
   const task = watch('taskDescription')
 
   return (
     <HomeContainer>
-      <form action="" onSubmit={handleSubmit(onCreateNewWorkCycle)}>
+      <form action="" onSubmit={handleSubmit((data: NewCycleData) => {
+        onCreateNewWorkCycle(data)
+        reset()
+      })}>
         <FormProvider {...form}>
           <NewWorkCycleForm />
         </FormProvider>
