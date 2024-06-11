@@ -1,4 +1,10 @@
-import { ReactNode, createContext, useState } from "react";
+import { ReactNode, createContext, useReducer } from "react";
+import { cyclesReducer } from "../reducers/cycles/reducer";
+import {
+  addNewCycleAction,
+  interruptActiveWorkCycleAction,
+  markActiveWorkCycleAsFinished
+} from "../reducers/cycles/actions";
 
 type CreateCycleData = {
   taskDescription: string;
@@ -30,32 +36,14 @@ type CyclesContextProviderProps = {
 }
 
 export function CyclesContextProvider({ children }: CyclesContextProviderProps) {
-  const [cycles, setCycles] = useState<Cycle[]>([])
-  const [activeWorkCycle, setActiveWorkCycle] = useState<Cycle | undefined>(undefined)
+  const [cycles, dispatch] = useReducer(cyclesReducer, { cycles: [], activeWorkCycle: null })
 
   function handleInterruptWorkCycle() {
-    const filteredCycles = cycles.map((c) => {
-      if (activeWorkCycle && c.id === activeWorkCycle.id) {
-        return { ...c, interruptedDate: new Date() }
-      } else {
-        return c
-      }
-    })
-
-    setCycles(filteredCycles)
-    setActiveWorkCycle(undefined)
+    dispatch(interruptActiveWorkCycleAction())
   }
 
   function cycleFinished(cycle: Cycle) {
-    const mappedCycles = cycles.map((c) => {
-      if (activeWorkCycle && c.id === cycle.id) {
-        return { ...c, finishedDate: new Date() }
-      } else {
-        return c
-      }
-    })
-    setCycles(mappedCycles)
-    setActiveWorkCycle(undefined)
+    dispatch(markActiveWorkCycleAsFinished(cycle))
   }
 
   function newWorkCycle(data: CreateCycleData) {
@@ -66,8 +54,7 @@ export function CyclesContextProvider({ children }: CyclesContextProviderProps) 
       startDate: new Date(),
     }
 
-    setCycles((state) => [...state, cycle])
-    setActiveWorkCycle(cycle)
+    dispatch(addNewCycleAction(cycle))
   }
 
   return (

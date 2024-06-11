@@ -17,7 +17,6 @@ const newCycleFormSchema = z.object({
 
 type NewCycleData = z.infer<typeof newCycleFormSchema>
 
-
 export function Home() {
   const { activeWorkCycle, onCreateNewWorkCycle, interruptCurrentWorkCycle } = useContext(CyclesContext)
   const form = useForm<NewCycleData>({
