@@ -1,3 +1,4 @@
+import { produce } from "immer";
 import { Cycle } from "../../contexts/CyclesContext";
 import { CycleActionType } from "./actions";
 
@@ -8,36 +9,43 @@ type CyclesState = {
 
 export function cyclesReducer(state: CyclesState, action: any) {
   switch (action.type) {
-    case CycleActionType.ADD_NEW_CYCLE:
-      return {
-        ...state,
-        cycles: [...state.cycles, action.payload.cycle],
-        activeWorkCycle: action.payload.cycle,
+    case CycleActionType.ADD_NEW_CYCLE: {
+      return produce(state, draft => {
+        draft.cycles.push(action.payload.cycle)
+        draft.activeWorkCycle = action.payload.cycle
+      })
+    }
+
+    case CycleActionType.INTERRUPT_ACTIVE_CYCLE: {
+      const cycleIndex = state.cycles.findIndex((c) => {
+        return state.activeWorkCycle && state.activeWorkCycle.id === c.id
+      })
+
+      if (cycleIndex < 0) {
+        return state;
       }
-    case CycleActionType.INTERRUPT_ACTIVE_CYCLE:
-      return {
-        ...state,
-        cycles: state.cycles.map((c) => {
-          if (state.activeWorkCycle && c.id === state.activeWorkCycle.id) {
-            return { ...c, interruptedDate: new Date() }
-          } else {
-            return c
-          }
-        }),
-        activeWorkCycle: null,
+
+      return produce(state, draft => {
+        draft.activeWorkCycle = null
+        draft.cycles[cycleIndex].interruptedDate = new Date()
+      })
+    }
+
+    case CycleActionType.CYCLE_FINISHED: {
+      const cycleIndex = state.cycles.findIndex((c) => {
+        return state.activeWorkCycle && state.activeWorkCycle.id === c.id
+      })
+
+      if (cycleIndex < 0) {
+        return state;
       }
-    case CycleActionType.CYCLE_FINISHED:
-      return {
-        ...state,
-        cycles: state.cycles.map((c) => {
-          if (state.activeWorkCycle && c.id === state.activeWorkCycle.id) {
-            return { ...c, finishedDate: new Date() }
-          } else {
-            return c
-          }
-        }),
-        activeWorkCycle: null,
-      }
+
+      return produce(state, draft => {
+        draft.activeWorkCycle = null
+        draft.cycles[cycleIndex].finishedDate = new Date()
+      })
+    }
+
     default:
       return state
   }

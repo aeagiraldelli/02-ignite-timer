@@ -21,7 +21,7 @@ export type Cycle = {
 }
 
 type CyclesContextData = {
-  activeWorkCycle: Cycle | undefined;
+  activeWorkCycle: Cycle | null;
   onCycleFinished: (cycle: Cycle) => void;
   totalCountdownMinutes: number;
   onCreateNewWorkCycle: (data: CreateCycleData) => void,
@@ -36,7 +36,7 @@ type CyclesContextProviderProps = {
 }
 
 export function CyclesContextProvider({ children }: CyclesContextProviderProps) {
-  const [cycles, dispatch] = useReducer(cyclesReducer, { cycles: [], activeWorkCycle: null })
+  const [cyclesState, dispatch] = useReducer(cyclesReducer, { cycles: [], activeWorkCycle: null })
 
   function handleInterruptWorkCycle() {
     dispatch(interruptActiveWorkCycleAction())
@@ -47,25 +47,25 @@ export function CyclesContextProvider({ children }: CyclesContextProviderProps) 
   }
 
   function newWorkCycle(data: CreateCycleData) {
-    const cycle: Cycle = {
+    const c: Cycle = {
       id: new Date().getTime().toString(),
       task: data.taskDescription,
       totalMinutes: data.durationMinutes,
       startDate: new Date(),
     }
 
-    dispatch(addNewCycleAction(cycle))
+    dispatch(addNewCycleAction(c))
   }
 
   return (
     <CyclesContext.Provider
       value={{
-        activeWorkCycle,
+        activeWorkCycle: cyclesState.activeWorkCycle,
         onCycleFinished: cycleFinished,
-        totalCountdownMinutes: activeWorkCycle ? activeWorkCycle?.totalMinutes : 0,
+        totalCountdownMinutes: cyclesState.activeWorkCycle ? cyclesState.activeWorkCycle.totalMinutes : 0,
         onCreateNewWorkCycle: newWorkCycle,
         interruptCurrentWorkCycle: handleInterruptWorkCycle,
-        cycles: cycles
+        cycles: cyclesState.cycles
       }}>
       {children}
     </CyclesContext.Provider>
