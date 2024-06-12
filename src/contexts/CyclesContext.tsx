@@ -38,16 +38,13 @@ type CyclesContextProviderProps = {
 const STORAGE_KEY = "@ignite-timer:cycles-state-1.0.0"
 
 export function CyclesContextProvider({ children }: CyclesContextProviderProps) {
-  const [cyclesState, dispatch] = useReducer(cyclesReducer, { cycles: [], activeWorkCycle: null }, () => {
+  const [cyclesState, dispatch] = useReducer(cyclesReducer, { cycles: [], activeWorkCycle: null }, (initialState) => {
     const storedData = localStorage.getItem(STORAGE_KEY)
     if (storedData) {
       return JSON.parse(storedData)
     }
 
-    return {
-      cycles: [],
-      activeWorkCycle: null
-    }
+    return initialState
   })
 
   useEffect(() => {
