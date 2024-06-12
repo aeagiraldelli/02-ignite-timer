@@ -1,4 +1,4 @@
-import { ReactNode, createContext, useReducer } from "react";
+import { ReactNode, createContext, useEffect, useReducer } from "react";
 import { cyclesReducer } from "../reducers/cycles/reducer";
 import {
   addNewCycleAction,
@@ -35,8 +35,25 @@ type CyclesContextProviderProps = {
   children: ReactNode
 }
 
+const STORAGE_KEY = "@ignite-timer:cycles-state-1.0.0"
+
 export function CyclesContextProvider({ children }: CyclesContextProviderProps) {
-  const [cyclesState, dispatch] = useReducer(cyclesReducer, { cycles: [], activeWorkCycle: null })
+  const [cyclesState, dispatch] = useReducer(cyclesReducer, { cycles: [], activeWorkCycle: null }, () => {
+    const storedData = localStorage.getItem(STORAGE_KEY)
+    if (storedData) {
+      return JSON.parse(storedData)
+    }
+
+    return {
+      cycles: [],
+      activeWorkCycle: null
+    }
+  })
+
+  useEffect(() => {
+    const stateJSON = JSON.stringify(cyclesState)
+    localStorage.setItem(STORAGE_KEY, stateJSON)
+  }, [cyclesState])
 
   function handleInterruptWorkCycle() {
     dispatch(interruptActiveWorkCycleAction())
